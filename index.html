@@ -3,33 +3,81 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bản đồ cho thuê nhà</title>
+    <title>My Rental Map</title>
+    <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
     <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        header {
+            background: #007bff;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
         #map {
             height: 70vh;
+            width: 100%;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+        .content {
+            padding: 20px;
+            text-align: center;
+        }
+        footer {
+            text-align: center;
+            padding: 20px;
+            background: #007bff;
+            color: white;
+            position: relative;
+            bottom: 0;
             width: 100%;
         }
     </style>
 </head>
 <body>
-    <h1>Bản đồ cho thuê nhà</h1>
-    <div id="map"></div>
-
+    <header>
+        <h1>Bản đồ cho thuê nhà</h1>
+    </header>
+    <div class="content">
+        <p>Khám phá các vị trí căn nhà cho thuê gần bạn!</p>
+        <div id="map"></div>
+        <ul id="house-list"></ul> <!-- Danh sách căn nhà -->
+    </div>
+    <footer>
+        <p>&copy; 2024 My Rental Map</p>
+    </footer>
     <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
     <script>
-        // Khởi tạo bản đồ với tọa độ trung tâm
+        // Khởi tạo bản đồ
         var map = L.map('map').setView([10.762622, 106.660172], 13);
-
-        // Thêm layer bản đồ từ OpenStreetMap
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         }).addTo(map);
 
-        // Thêm marker ví dụ
-        var marker = L.marker([10.762622, 106.660172]).addTo(map)
-            .bindPopup('Vị trí căn nhà.')
-            .openPopup();
+        // Tải dữ liệu từ file houses.json
+        fetch('houses.json')
+            .then(response => response.json())
+            .then(data => {
+                // Hiển thị danh sách các căn nhà
+                const houseList = document.getElementById('house-list');
+                data.forEach(house => {
+                    const listItem = document.createElement('li');
+                    listItem.innerHTML = `<strong>${house.name}</strong>: ${house.description}`;
+                    houseList.appendChild(listItem);
+
+                    // Thêm marker vào bản đồ
+                    L.marker(house.location).addTo(map)
+                        .bindPopup(house.name)
+                        .openPopup();
+                });
+            })
+            .catch(error => console.error('Lỗi khi tải dữ liệu:', error));
     </script>
 </body>
 </html>
